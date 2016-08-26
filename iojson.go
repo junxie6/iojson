@@ -127,3 +127,14 @@ func (o *IOJSON) Echo(w http.ResponseWriter) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
+// EchoHandler ...
+func EchoHandler(h http.Handler, o *IOJSON) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			o.Echo(w)
+		}()
+
+		h.ServeHTTP(w, r)
+	})
+}
