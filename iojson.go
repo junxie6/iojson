@@ -2,6 +2,7 @@ package iojson
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -24,11 +25,11 @@ type D map[string]interface{}
 
 // IOJSON ...
 type IOJSON struct {
-	sync.RWMutex // embedded.  see http://golang.org/ref/spec#Struct_types
 	Status       bool
 	ErrArr       []string
 	ErrCount     int8
 	ObjArr       []interface{}
+	sync.RWMutex // embedded.  see http://golang.org/ref/spec#Struct_types
 	Data         D
 }
 
@@ -129,12 +130,15 @@ func (o *IOJSON) Echo(w http.ResponseWriter) {
 }
 
 // EchoHandler ...
-func EchoHandler(h http.Handler, o *IOJSON) http.Handler {
+func EchoHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := NewIOJSON()
+		ctx := context.WithValue(r.Context(), "iojson", o)
+
 		defer func() {
 			o.Echo(w)
 		}()
 
-		h.ServeHTTP(w, r)
+		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
