@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -132,6 +133,8 @@ func (o *IOJSON) Echo(w http.ResponseWriter) {
 // EchoHandler ...
 func EchoHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("DEBUG_ECHO: Inside")
+
 		o := NewIOJSON()
 		ctx := context.WithValue(r.Context(), "iojson", o)
 
