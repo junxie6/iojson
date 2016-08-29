@@ -18,6 +18,7 @@ const (
 )
 
 var (
+	// IOLimitReaderSize ...
 	IOLimitReaderSize int64 = 2 * MB
 )
 
