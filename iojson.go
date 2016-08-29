@@ -147,16 +147,15 @@ func EchoHandler(h http.Handler) http.Handler {
 }
 
 // ErrorHandler ...
-func ErrorHandler(errstr string) func(h http.Handler) http.Handler {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			o := r.Context().Value("iojson").(*IOJSON)
+func ErrorHandler(errstr string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := r.Context().Value("iojson").(*IOJSON)
 
-			if errstr != "" {
-				o.AddError(errstr)
-			} else {
-				o.AddError("iojson.ErrorHandler")
-			}
-		})
-	}
+		if errstr != "" {
+			o.AddError(errstr)
+		} else {
+			o.AddError("iojson.ErrorHandler")
+		}
+	})
+
 }
