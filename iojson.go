@@ -149,6 +149,8 @@ func EchoHandler(h http.Handler) http.Handler {
 // ErrorHandler ...
 func ErrorHandler(errstr string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("DEBUG_ERROR: Inside")
+
 		o := r.Context().Value("iojson").(*IOJSON)
 
 		if errstr != "" {
