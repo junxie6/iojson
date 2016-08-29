@@ -159,5 +159,4 @@ func ErrorHandler(errstr string) http.Handler {
 			o.AddError("iojson.ErrorHandler")
 		}
 	})
-
 }
