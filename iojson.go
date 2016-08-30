@@ -17,6 +17,10 @@ const (
 	MB = 1 << 20
 )
 
+const (
+	CKey = "iojsonCkey" // Key name for context
+)
+
 var (
 	// IOLimitReaderSize ...
 	IOLimitReaderSize int64 = 2 * MB
@@ -137,7 +141,7 @@ func EchoHandler(h http.Handler) http.Handler {
 		log.Printf("DEBUG_ECHO: Inside")
 
 		o := NewIOJSON()
-		ctx := context.WithValue(r.Context(), "iojson", o)
+		ctx := context.WithValue(r.Context(), CKey, o)
 
 		defer func() {
 			o.Echo(w)
@@ -152,7 +156,7 @@ func ErrorHandler(errstr string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("DEBUG_ERROR: Inside")
 
-		o := r.Context().Value("iojson").(*IOJSON)
+		o := r.Context().Value(CKey).(*IOJSON)
 
 		if errstr != "" {
 			o.AddError(errstr)
