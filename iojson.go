@@ -89,6 +89,7 @@ func (o *IOJSON) Encode() []byte {
 	if o.ErrCount == 0 {
 		o.Status = true
 	} else {
+		// reset to default
 		o.Status = false
 		o.ObjArr = []interface{}{}
 		o.Data = make(D)
