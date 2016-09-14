@@ -18,8 +18,8 @@ const (
 )
 
 const (
-	// CKey is the key name for context
-	CKey = "iojsonCkey"
+	// CTXKey is the key name for context
+	CTXKey = "iojsonCkey"
 )
 
 var (
