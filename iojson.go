@@ -143,7 +143,7 @@ func EchoHandler(h http.Handler) http.Handler {
 		//log.Printf("DEBUG: iojson.EchoHandler: Inside")
 
 		o := NewIOJSON()
-		ctx := context.WithValue(r.Context(), CKey, o)
+		ctx := context.WithValue(r.Context(), CTXKey, o)
 
 		defer func() {
 			o.Echo(w)
@@ -158,7 +158,7 @@ func ErrorHandler(errstr string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("DEBUG: iojson.ErrorHandler: Inside")
 
-		o := r.Context().Value(CKey).(*IOJSON)
+		o := r.Context().Value(CTXKey).(*IOJSON)
 
 		if errstr != "" {
 			o.AddError(errstr)
