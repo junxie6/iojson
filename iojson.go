@@ -60,6 +60,12 @@ func (o *IOJSON) AddObj(v interface{}) {
 	o.ObjArr = append(o.ObjArr, v)
 }
 
+// GetObj ...
+// TODO: need to figure it out
+func (o *IOJSON) GetObj(k int) interface{} {
+	return o.ObjArr[k]
+}
+
 // AddData ...
 func (o *IOJSON) AddData(k string, v interface{}) {
 	o.Lock()
@@ -68,6 +74,7 @@ func (o *IOJSON) AddData(k string, v interface{}) {
 }
 
 // GetData ...
+// TODO: need to figure it out
 func (o *IOJSON) GetData(k string) interface{} {
 	o.RLock()
 	defer o.RUnlock()
