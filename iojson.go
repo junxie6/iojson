@@ -1,3 +1,10 @@
+// Package iojson ...
+// when go-json
+// I would AddObj, AddData, then Encode.
+// Then, I would expect it to be converted to JSON string.
+//
+// when json-go
+// I would AddObj, AddData, then Decode.
 package iojson
 
 import (
@@ -28,16 +35,17 @@ var (
 )
 
 // D ...
-type D map[string]interface{}
+//type D map[string]interface{}
+type D map[string]*json.RawMessage
 
 // IOJSON ...
 type IOJSON struct {
 	Status       bool
 	ErrArr       []string
 	ErrCount     int8
-	ObjArr       []interface{}
-	sync.RWMutex // embedded.  see http://golang.org/ref/spec#Struct_types
-	Data         D
+	ObjArr       []interface{} // NOTE: do not access this field directly.
+	sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
+	Data         D             // NOTE: do not access this field directly.
 }
 
 // NewIOJSON ...
@@ -61,24 +69,46 @@ func (o *IOJSON) AddObj(v interface{}) {
 }
 
 // GetObj ...
-// TODO: need to figure it out
 func (o *IOJSON) GetObj(k int) interface{} {
+	// TODO: check array boundary and return error if necessary.
 	return o.ObjArr[k]
 }
 
 // AddData ...
 func (o *IOJSON) AddData(k string, v interface{}) {
+	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
 	o.Lock()
 	defer o.Unlock()
-	o.Data[k] = v
+	// TODO: change the following line to *json.RawMessage
+	//o.Data[k] = v
 }
 
 // GetData ...
-// TODO: need to figure it out
-func (o *IOJSON) GetData(k string) interface{} {
+func (o *IOJSON) GetData(k string, obj *interface{}) (interface{}, error) {
+	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
 	o.RLock()
 	defer o.RUnlock()
-	return o.Data[k]
+
+	//return o.Data[k]
+
+	if obj == nil {
+		obj = new(interface{})
+	}
+	return obj, o.PopulateObj(k, obj)
+}
+
+// PopulateObj ...
+// NOTE: *json.RawMessage
+// Populate object
+func (o *IOJSON) PopulateObj(k string, obj *interface{}) error {
+	o.RLock()
+	defer o.RUnlock()
+
+	if err := json.NewDecoder(bytes.NewReader(*o.Data[k])).Decode(obj); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // JSONFail ...
