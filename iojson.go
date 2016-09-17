@@ -31,6 +31,7 @@ const (
 )
 
 const (
+	// ErrDataKeyNotExist ...
 	ErrDataKeyNotExist = " key does not exist"
 )
 
@@ -40,7 +41,7 @@ var (
 )
 
 // D ...
-//type D map[string]interface{}
+// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied a object.
 type D map[string]*json.RawMessage
 
 // IOJSON ...
@@ -101,7 +102,6 @@ func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 }
 
 // PopulateObj ...
-// NOTE: *json.RawMessage
 // Populate object
 func (o *IOJSON) populateObj(k string, obj interface{}) error {
 	o.RLock()

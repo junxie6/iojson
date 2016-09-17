@@ -24,9 +24,10 @@ func TestGetData(t *testing.T) {
 		obj         interface{}
 	}{
 		{`{"Data":{"%s":{"Name":"%s"}}}`, "Car", "", "BMW", &Car{Name: "Init Car"}},
+		{`{"Data":{"%s":{"Name":"%s"}}}`, "Car", "Dummy", "BMW", &Car{Name: "Init Car"}},
 		{`{"Data":{"%s":"%s"}}`, "Hello", "", "World", nil},
 		{`{"Data":{"%s":%s}}`, "Amt", "", "123.8", nil},
-		{`{"Data":{"%s":%s}}`, "Amt", "X", "123.8", nil},
+		{`{"Data":{"%s":%s}}`, "Amt", "Dummy", "123.8", nil},
 	}
 
 	for _, test := range tests {
@@ -45,26 +46,35 @@ func TestGetData(t *testing.T) {
 			t.Errorf("i.Decode(strings.NewReader(%v)) = %v", test.json, err)
 
 			continue
-		} else if val, err := i.GetData(test.key, test.obj); err != nil {
+		}
+
+		if val, err := i.GetData(test.key, test.obj); err != nil {
 			if err.Error() == test.key+ErrDataKeyNotExist {
 				// Do nothing. Recognized error.
+				fmt.Printf("%v (not exist): %#v\n", test.key, val)
 			} else {
-				t.Errorf("i.GetData(%v) = %v", test.key, err)
+				t.Errorf("i.GetData(%v, %v) = %v", test.key, test.obj, err)
 			}
 
 			continue
-		} else if test.obj == nil {
-			fmt.Printf("%v: %#v\n", test.key, val)
-		}
-
-		if test.obj != nil {
+		} else {
 			switch v := test.obj.(type) {
 			case *Car:
+				// use the original object.
 				if name := test.obj.(*Car).GetName(); name != test.want {
-					t.Errorf("%v.GetName(%v) = %v", test.key, test.key, name)
+					t.Errorf("%v.GetName() = %v; want = %v", test.key, name, test.want)
 				} else {
-					fmt.Printf("%v: %#v\n", test.key, name)
+					fmt.Printf("%v: %#v (original object)\n", test.key, name)
 				}
+
+				// use the returned object.
+				if name := val.(*Car).GetName(); name != test.want {
+					t.Errorf("%v.GetName() = %v; want = %v", test.key, name, test.want)
+				} else {
+					fmt.Printf("%v: %#v (returned object)\n", test.key, name)
+				}
+			case nil:
+				fmt.Printf("%v: %#v\n", test.key, val)
 			default:
 				t.Errorf("test.obj(type) = %v", v)
 			}
