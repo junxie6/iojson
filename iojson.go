@@ -14,7 +14,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"reflect"
 	"strings"
 	"sync"
 )
@@ -103,7 +102,7 @@ func (o *IOJSON) PopulateObj(k string, obj interface{}) error {
 	o.RLock()
 	defer o.RUnlock()
 
-	log.Printf("XX: %v", reflect.ValueOf(obj).Kind())
+	//log.Printf("XX: %v", reflect.ValueOf(obj).Kind())
 
 	if err := json.NewDecoder(bytes.NewReader(*o.Data[k])).Decode(obj); err != nil {
 		return err
