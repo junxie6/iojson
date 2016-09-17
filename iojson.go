@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -27,6 +28,10 @@ const (
 const (
 	// CTXKey is the key name for context
 	CTXKey = "iojsonCkey"
+)
+
+const (
+	ErrDataKeyNotExist = " key does not exist"
 )
 
 var (
@@ -92,19 +97,19 @@ func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	//return o.Data[k]
 
 	// TODO: figure it out the return "obj" when obj or primitive type?
-	return obj, o.PopulateObj(k, &obj)
+	return obj, o.populateObj(k, &obj)
 }
 
 // PopulateObj ...
 // NOTE: *json.RawMessage
 // Populate object
-func (o *IOJSON) PopulateObj(k string, obj interface{}) error {
+func (o *IOJSON) populateObj(k string, obj interface{}) error {
 	o.RLock()
 	defer o.RUnlock()
 
-	//log.Printf("XX: %v", reflect.ValueOf(obj).Kind())
-
-	if err := json.NewDecoder(bytes.NewReader(*o.Data[k])).Decode(obj); err != nil {
+	if v, ok := o.Data[k]; !ok {
+		return errors.New(k + ErrDataKeyNotExist)
+	} else if err := json.NewDecoder(bytes.NewReader(*v)).Decode(obj); err != nil {
 		return err
 	}
 
