@@ -14,6 +14,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 )
@@ -84,25 +85,25 @@ func (o *IOJSON) AddData(k string, v interface{}) {
 }
 
 // GetData ...
-func (o *IOJSON) GetData(k string, obj *interface{}) (interface{}, error) {
+func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
 	o.RLock()
 	defer o.RUnlock()
 
 	//return o.Data[k]
 
-	if obj == nil {
-		obj = new(interface{})
-	}
-	return obj, o.PopulateObj(k, obj)
+	// TODO: figure it out the return "obj" when obj or primitive type?
+	return obj, o.PopulateObj(k, &obj)
 }
 
 // PopulateObj ...
 // NOTE: *json.RawMessage
 // Populate object
-func (o *IOJSON) PopulateObj(k string, obj *interface{}) error {
+func (o *IOJSON) PopulateObj(k string, obj interface{}) error {
 	o.RLock()
 	defer o.RUnlock()
+
+	log.Printf("XX: %v", reflect.ValueOf(obj).Kind())
 
 	if err := json.NewDecoder(bytes.NewReader(*o.Data[k])).Decode(obj); err != nil {
 		return err
