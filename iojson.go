@@ -143,11 +143,6 @@ func (o *IOJSON) JSONFail(err error) string {
 
 // Encode encodes the object itself to JSON and return []byte.
 func (o *IOJSON) Encode() []byte {
-	// TODO: find out the difference between the following three lines and io.Reader.
-	//var b bytes.Buffer
-	//bytes.NewBuffer([]byte("test"))
-	//b := new(bytes.Buffer)
-
 	if o.ErrCount == 0 {
 		o.Status = true
 	} else {
@@ -156,6 +151,11 @@ func (o *IOJSON) Encode() []byte {
 		o.ObjArr = []interface{}{}
 		o.Data = make(D)
 	}
+
+	// TODO: find out the difference between the following three lines and io.Reader.
+	//var b bytes.Buffer
+	//bytes.NewBuffer([]byte("test"))
+	//b := new(bytes.Buffer) // // new takes a type as an argument, allocates enough memory to fit a value of that type, and returns a pointer to it.
 
 	//if err := json.NewEncoder(b).Encode(o); err != nil {
 	//	return []byte(o.JSONFail(err))
