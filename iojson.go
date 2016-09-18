@@ -48,8 +48,9 @@ type D map[string]*json.RawMessage
 type IOJSON struct {
 	Status   bool
 	ErrArr   []string
-	ErrCount int8
+	ErrCount int
 	ObjArr   []interface{} // NOTE: do not access this field directly.
+	ObjCount int
 	//sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
 	Data D // NOTE: do not access this field directly.
 }
@@ -72,12 +73,17 @@ func (o *IOJSON) AddError(str string) {
 // AddObj ...
 func (o *IOJSON) AddObj(v interface{}) {
 	o.ObjArr = append(o.ObjArr, v)
+	o.ObjCount++
 }
 
 // GetObj ...
-func (o *IOJSON) GetObj(k int) interface{} {
+func (o *IOJSON) GetObj(k int) (interface{}, error) {
+	if k < 0 || k >= o.ObjCount {
+		return nil, errors.New(ErrDataKeyNotExist)
+	}
+
 	// TODO: check array boundary and return error if necessary.
-	return o.ObjArr[k]
+	return o.ObjArr[k], nil
 }
 
 // AddData ...
