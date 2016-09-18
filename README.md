@@ -5,7 +5,7 @@ IOJSON is a handy tool to encode/decoding data between Go and JSON.
 
 # Usages
 
-## convert JSON to a live Go object through iojson.ObjArr
+## Convert JSON to a live Go object through iojson.ObjArr
 
 ```
 package main
@@ -50,7 +50,7 @@ func srvRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	o := iojson.NewIOJSON()
-	o.AddObj(car)
+	o.AddObj(car) // car data will be populated once it's decoded.
 
 	if err := o.Decode(r.Body); err != nil {
 		w.Write([]byte(err.Error()))
@@ -67,4 +67,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 ```
+
+**Run curl command:**
+
 \# curl -H "Content-Type: application/json; charset=UTF-8" -X GET -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name": "BMW","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"Data":{}}' http://127.0.0.1:8080/
