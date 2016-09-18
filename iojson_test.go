@@ -32,7 +32,6 @@ func TestGetData(t *testing.T) {
 
 	for _, test := range tests {
 		//fmt.Printf("HERE: %v\n", reflect.TypeOf(test.obj))
-		//theType := reflect.TypeOf(test.obj)
 		//theType := reflect.New(reflect.TypeOf(test.obj)).Interface()
 
 		test.json = fmt.Sprintf(test.json, test.key, test.want)
@@ -80,18 +79,6 @@ func TestGetData(t *testing.T) {
 			}
 		}
 	}
-
-	//carName := "BMW"
-	//str := fmt.Sprintf(`{"Data":{"Hello":"World","Car":{"Name":"%s"}, "Age":18 }}`, carName)
-
-	//i := NewIOJSON()
-	//i.Decode(strings.NewReader(str))
-
-	//if _, err := i.GetData("Car", car); err != nil {
-	//	t.Errorf("i.GetData(%v) = %v", "Car", err)
-	//} else if n := car.GetName(); n != carName {
-	//	t.Errorf("car.GetName(%v) = %v", carName, n)
-	//}
 }
 
 func BenchmarkEncode(b *testing.B) {
@@ -100,6 +87,19 @@ func BenchmarkEncode(b *testing.B) {
 	o.AddData("test", "test")
 
 	for i := 0; i < b.N; i++ {
+		o.Encode()
+	}
+}
+
+func BenchmarkAddData(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		car := &Car{
+			Name: "Init Car",
+		}
+		o := NewIOJSON()
+		o.AddData("Car", car)
+		o.AddData("Hello", "World")
+		o.AddData("Age", 18)
 		o.Encode()
 	}
 }

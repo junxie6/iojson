@@ -16,7 +16,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"sync"
+	//"sync"
 )
 
 // Size constants
@@ -46,12 +46,12 @@ type D map[string]*json.RawMessage
 
 // IOJSON ...
 type IOJSON struct {
-	Status       bool
-	ErrArr       []string
-	ErrCount     int8
-	ObjArr       []interface{} // NOTE: do not access this field directly.
-	sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
-	Data         D             // NOTE: do not access this field directly.
+	Status   bool
+	ErrArr   []string
+	ErrCount int8
+	ObjArr   []interface{} // NOTE: do not access this field directly.
+	//sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
+	Data D // NOTE: do not access this field directly.
 }
 
 // NewIOJSON ...
@@ -81,31 +81,50 @@ func (o *IOJSON) GetObj(k int) interface{} {
 }
 
 // AddData ...
-func (o *IOJSON) AddData(k string, v interface{}) {
+func (o *IOJSON) AddData(k string, v interface{}) error {
 	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
-	o.Lock()
-	defer o.Unlock()
-	// TODO: change the following line to *json.RawMessage
-	//o.Data[k] = v
+	//o.Lock()
+	//defer o.Unlock()
+
+	var b []byte
+	var err error
+
+	if b, err = json.Marshal(v); err != nil {
+		return err
+	}
+
+	j := json.RawMessage(b)
+	o.Data[k] = &j
+
+	// NOTE: another way of assigning value to *json.RawMessage.
+	//jPtr := new(json.RawMessage)
+	//*jPtr = b.Bytes()
+	//o.Data[k] = jPtr
+
+	return nil
 }
+
+//func (o *IOJSON) MarshalJSON() ([]byte, error) {
+//	return json.Marshal(o.Tmp)
+//}
 
 // GetData ...
 func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
-	o.RLock()
-	defer o.RUnlock()
+	//o.RLock()
+	//defer o.RUnlock()
 
-	//return o.Data[k]
-
-	// TODO: figure it out the return "obj" when obj or primitive type?
+	// TODO: figure it out the return "obj" when obj or primitive types?
+	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
 	return obj, o.populateObj(k, &obj)
 }
 
 // PopulateObj ...
 // Populate object
 func (o *IOJSON) populateObj(k string, obj interface{}) error {
-	o.RLock()
-	defer o.RUnlock()
+	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
+	//o.RLock()
+	//defer o.RUnlock()
 
 	if v, ok := o.Data[k]; !ok {
 		return errors.New(k + ErrDataKeyNotExist)
@@ -127,7 +146,7 @@ func (o *IOJSON) Encode() []byte {
 	// TODO: find out the difference between the following three lines and io.Reader.
 	//var b bytes.Buffer
 	//bytes.NewBuffer([]byte("test"))
-	b := new(bytes.Buffer)
+	//b := new(bytes.Buffer)
 
 	if o.ErrCount == 0 {
 		o.Status = true
@@ -138,11 +157,18 @@ func (o *IOJSON) Encode() []byte {
 		o.Data = make(D)
 	}
 
-	if err := json.NewEncoder(b).Encode(o); err != nil {
+	//if err := json.NewEncoder(b).Encode(o); err != nil {
+	//	return []byte(o.JSONFail(err))
+	//}
+
+	var b []byte
+	var err error
+
+	if b, err = json.Marshal(o); err != nil {
 		return []byte(o.JSONFail(err))
 	}
 
-	return b.Bytes()
+	return b
 }
 
 // EncodePretty ...
