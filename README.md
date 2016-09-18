@@ -3,9 +3,9 @@
 # iojson
 IOJSON is a handy tool to encode/decoding data between Go and JSON.
 
-# Usages
+### Usage
 
-## Convert JSON to a live Go object through iojson.ObjArr
+This complete example shows converting from JSON to a live Go object through iojson.ObjArr:
 
 ```
 package main
