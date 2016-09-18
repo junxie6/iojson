@@ -50,10 +50,10 @@ func srvRoot(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	o := iojson.NewIOJSON()
-	o.AddObj(car) // car data will be populated once it's decoded.
+	i := iojson.NewIOJSON()
+	i.AddObj(car) // car data will be populated once it's decoded.
 
-	if err := o.Decode(r.Body); err != nil {
+	if err := i.Decode(r.Body); err != nil {
 		w.Write([]byte(err.Error()))
 	} else {
 		// showing a live object with working methods.
