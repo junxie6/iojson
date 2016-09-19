@@ -22,7 +22,7 @@ iojson also provides a HTTP middleware function, which works with a famous middl
 
 ### Usage
 
-#### Add a object to the slice and the map then encode:
+#### Add a object to the slice and the map. Then, encode it:
 
 ```
 type Car struct {
@@ -37,7 +37,7 @@ i := iojson.NewIOJSON()
 i.AddObj(car)         // add to the slice.
 i.AddData("car", car) // add to the map.
 
-fmt.Printf("%s\n", i.Encode())
+fmt.Printf("%s\n", i.Encode()) // encode the data.
 ```
 
 **Sample output:**
