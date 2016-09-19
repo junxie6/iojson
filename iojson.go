@@ -77,14 +77,15 @@ func (o *IOJSON) AddObj(v interface{}) {
 }
 
 // GetObj ...
-func (o *IOJSON) GetObj(k int) (interface{}, error) {
-	if k < 0 || k >= o.ObjCount {
-		return nil, errors.New(ErrDataKeyNotExist)
-	}
-
-	// TODO: check array boundary and return error if necessary.
-	return o.ObjArr[k], nil
-}
+// NOTE: I do not see a need for this function yet?
+//func (o *IOJSON) GetObj(k int) (interface{}, error) {
+//	if k < 0 || k >= o.ObjCount {
+//		return nil, errors.New(ErrDataKeyNotExist)
+//	}
+//
+//	// TODO: check array boundary and return error if necessary.
+//	return o.ObjArr[k], nil
+//}
 
 // AddData ...
 func (o *IOJSON) AddData(k string, v interface{}) error {
@@ -120,7 +121,6 @@ func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	//o.RLock()
 	//defer o.RUnlock()
 
-	// TODO: figure it out the return "obj" when obj or primitive types?
 	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
 	return obj, o.populateObj(k, &obj)
 }
