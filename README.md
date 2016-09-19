@@ -185,4 +185,74 @@ func main() {
 
 **Run curl command:**
 
-\# curl -H "Content-Type: application/json; charset=UTF-8" -X GET -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name": "BMW","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"Data":{}}' http://127.0.0.1:8080/
+\# curl -H "Content-Type: application/json; charset=UTF-8" -X POST -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name": "My luxury car","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"Data":{}}' http://127.0.0.1:8080/
+
+**Sample outout:**
+
+```
+=========
+Car name: BMW
+Wheel size: 18 inches
+Wheel size: 28 inches
+=========
+{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"BMW","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"ObjCount":1,"Data":{}}
+```
+
+#### middleware sample:
+
+iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
+
+```
+package main
+
+import (
+	"log"
+	"net/http"
+)
+
+import (
+	"github.com/junhsieh/iojson"
+	"github.com/justinas/alice"
+)
+
+var gMux *http.ServeMux
+
+func srvRoot(w http.ResponseWriter, r *http.Request) {
+	o := r.Context().Value(iojson.CTXKey).(*iojson.IOJSON)
+	o.AddData("Hello", "World")
+
+	// showing how to add an error message.
+	if 1 == 2 {
+		o.AddError("my error message")
+	}
+}
+
+func main() {
+	gMux = http.NewServeMux()
+
+	chain := alice.New(
+		iojson.EchoHandler, // iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
+	)
+
+	gMux.Handle("/", chain.ThenFunc((srvRoot)))
+
+	srv := &http.Server{
+		Handler: gMux,
+		Addr:    ":8080",
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal("http.ListenAndServe: ", err)
+	}
+}
+```
+
+**Run curl command:**
+
+\# curl -H "Content-Type: application/json; charset=UTF-8" -X GET -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"Data":{}}' http://127.0.0.1:8080/
+
+**Sample outout:**
+
+```
+{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjCount":0,"Data":{"Hello":"World"}}
+```
