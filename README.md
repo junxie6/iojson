@@ -22,7 +22,7 @@ iojson also provides a HTTP middleware function, which works with a famous middl
 
 ### Usage
 
-#### Add a object to the slice and the map. Then, encode it:
+#### Add a object to the slice and the map. Then, let's encode it:
 
 ```
 type Car struct {
@@ -42,7 +42,77 @@ fmt.Printf("%s\n", i.Encode()) // encode the data.
 
 **Sample output:**
 
+```
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"Init car name"}],"ObjCount":1,"Data":{"car":{"Name":"Init car name"}}}
+```
+
+#### show how to populate data to some existing live objects:
+
+```
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+import (
+	"github.com/junhsieh/iojson"
+)
+
+type Car struct {
+	Name string
+}
+
+func (c *Car) GetName() string {
+	return c.Name
+}
+
+type House struct {
+	Name string
+}
+
+func (h *House) GetName() string {
+	return h.Name
+}
+
+func main() {
+	json := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car"}],"ObjCount":1,"Data":{"house":{"Name":"My luxury house"}}}`
+
+	car := &Car{
+		Name: "Init car name",
+	}
+	house := &House{
+		Name: "Init house name",
+	}
+
+	i := iojson.NewIOJSON()
+	i.AddObj(car) // add car to the slice. Data will be populated after decoded.
+
+	if err := i.Decode(strings.NewReader(json)); err != nil {
+		fmt.Printf("err: %s\n", err.Error())
+	} else {
+		// a live car object.
+		fmt.Printf("car: %s\n", car.GetName())
+
+		if v, err := i.GetData("house", house); err != nil {
+			fmt.Printf("err: %s\n", err.Error())
+		} else {
+			// a live house object.
+			fmt.Printf("house: %s\n", house.GetName())
+			fmt.Printf("house: %s\n", v.(*House).GetName())
+		}
+	}
+}
+```
+
+**Sample output:**
+
+```
+car: My luxury car
+house: My luxury house
+house: My luxury house
+```
 
 #### This complete example shows converting from JSON to a live Go object through iojson.ObjArr:
 
