@@ -1,8 +1,9 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/junhsieh/iojson)](https://goreportcard.com/report/github.com/junhsieh/iojson) [![GoDoc](https://godoc.org/github.com/junhsieh/iojson?status.svg)](https://godoc.org/github.com/junhsieh/iojson)
-
 # iojson
 
-IOJSON is a handy tool to encode/decoding data between Go and JSON. This tool may help you if your client and server were communicating through JSON.
+[![Go Report Card](https://goreportcard.com/badge/github.com/junhsieh/iojson)](https://goreportcard.com/report/github.com/junhsieh/iojson)
+[![GoDoc](https://godoc.org/github.com/junhsieh/iojson?status.svg)](https://godoc.org/github.com/junhsieh/iojson)
+
+iojson provides a convenient way to exchange data between your client and server through a uniform JSON format. It helps you to encode data from some Go structs to a JSON string and to decode data from a JSON string to some Go structs. iojson also provides a HTTP middleware function, which works with a famous middleware chainer called [Alice](https://github.com/justinas/alice).
 
 ### Usage
 
