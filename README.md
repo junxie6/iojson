@@ -7,7 +7,7 @@ iojson provides a convenient way to exchange data between your client and server
 
 iojson also provides a HTTP middleware function, which works with [Alice](https://github.com/justinas/alice) (a famous middleware chainer).
 
-### How the uniform format looks like?
+## How the uniform format looks like?
 
 ```
 {  
@@ -20,9 +20,9 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 }
 ```
 
-### Usage
+## Usage
 
-#### Add a object to the slice and the map. Then, let's encode it:
+### Add a object to the slice and the map. Then, let's encode it:
 
 ```
 type Car struct {
@@ -46,7 +46,7 @@ fmt.Printf("%s\n", i.Encode()) // encode the data.
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"Init car name"}],"ObjCount":1,"Data":{"car":{"Name":"Init car name"}}}
 ```
 
-#### show how to populate data to some existing live objects:
+### Show how to populate data to some existing live objects:
 
 ```
 package main
@@ -114,7 +114,7 @@ house: My luxury house
 house: My luxury house
 ```
 
-#### This complete example shows converting from JSON to a live Go object through iojson.ObjArr:
+### This complete example shows converting from JSON to a live Go object through iojson.ObjArr:
 
 ```
 package main
@@ -198,7 +198,7 @@ Wheel size: 28 inches
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"BMW","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"ObjCount":1,"Data":{}}
 ```
 
-#### middleware sample:
+### Middleware sample:
 
 iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
 
