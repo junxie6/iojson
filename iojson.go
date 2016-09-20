@@ -23,7 +23,7 @@ const (
 
 const (
 	// CTXKey is the key name for context
-	CTXKey = "iojsonCkey"
+	CTXKey = "iojsonCTXKey"
 )
 
 const (
@@ -37,10 +37,10 @@ var (
 )
 
 // JSONRawArr ...
+// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied an object.
 type JSONRawArr []*json.RawMessage
 
 // JSONRawMap ...
-// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied an object.
 type JSONRawMap map[string]*json.RawMessage
 
 // IOJSON ...
