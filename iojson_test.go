@@ -3,6 +3,7 @@ package iojson
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -28,52 +29,107 @@ type TestCase struct {
 	json        string
 	key         string
 	keyNotExist string
-	want        string
-	want2       string
+	want        string // Car value
+	want2       string // Item value
 	obj         interface{}
 }
 
 func GetTestCase(storeType string) []TestCase {
-	return []TestCase{
-		//{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "", "My luxury car", "Bag", &Car{}},
-		{`{"` + storeType + `":{"%s":[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]}}`, "Car", "", "My luxury car", "Bag", &[]Car{}},
-		//{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "", "World", "", nil},
-		//{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "Dummy", "World", "", nil},
-		//{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", "", nil},
-		//{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", "", nil},
+	var TestCaseMap = map[string][]TestCase{}
+
+	TestCaseMap["ObjArr"] = []TestCase{
+		// {[]}
+		{`{"` + storeType + `":[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]}`, "0", "", "My luxury car", "Bag", &Car{}},
+		// []{[]}
+		{`{"` + storeType + `":[[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]]}`, "0", "", "My luxury car", "Bag", &[]Car{}},
+		// ""
+		{`{"` + storeType + `":["%s"]}`, "0", "", "World", "", nil},
+		// 0
+		{`{"` + storeType + `":[%s]}`, "0", "", "123.8", "", nil},
+		// null
+		{`{"` + storeType + `":[%s]}`, "0", "", "null", "", nil},
 	}
+
+	TestCaseMap["Data"] = []TestCase{
+		// {[]}
+		{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "", "My luxury car", "Bag", &Car{}},
+		{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "Dummy", "My luxury car", "Bag", &Car{}},
+		// []{[]}
+		{`{"` + storeType + `":{"%s":[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]}}`, "Car", "", "My luxury car", "Bag", &[]Car{}},
+		{`{"` + storeType + `":{"%s":[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]}}`, "Car", "Dummy", "My luxury car", "Bag", &[]Car{}},
+		// ""
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "", "World", "", nil},
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "Dummy", "World", "", nil},
+		// 0
+		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", "", nil},
+		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", "", nil},
+	}
+
+	var v []TestCase
+	var ok bool
+
+	if v, ok = TestCaseMap[storeType]; !ok {
+		return nil
+	}
+
+	return v
 }
 
 func TestGetData(t *testing.T) {
-	var tests = GetTestCase("Data")
+	testTypeArr := []string{
+		"ObjArr",
+		"Data",
+	}
 
-	for _, test := range tests {
-		//fmt.Printf("HERE: %v\n", reflect.TypeOf(test.obj))
-		//theType := reflect.New(reflect.TypeOf(test.obj)).Interface()
+	for _, testtype := range testTypeArr {
+		fmt.Printf("================= [ %s ] ================\n", testtype)
 
-		test.json = fmt.Sprintf(test.json, test.key, test.want, test.want2)
-		//fmt.Printf("HERE: %v\n", test.json)
+		var tests = GetTestCase(testtype)
 
-		test.key += test.keyNotExist
+		for _, test := range tests {
+			//fmt.Printf("HERE: %v\n", reflect.TypeOf(test.obj))
+			//theType := reflect.New(reflect.TypeOf(test.obj)).Interface()
 
-		i := NewIOJSON()
+			switch testtype {
+			case "ObjArr":
+				test.json = fmt.Sprintf(test.json, test.want, test.want2)
+			case "Data":
+				test.json = fmt.Sprintf(test.json, test.key, test.want, test.want2)
+			}
+			//fmt.Printf("HERE: %v\n", test.json)
 
-		if err := i.Decode(strings.NewReader(test.json)); err != nil {
-			t.Errorf("i.Decode(strings.NewReader(%v)) = %v", test.json, err)
+			test.key += test.keyNotExist
 
-			continue
-		}
+			i := NewIOJSON()
 
-		if val, err := i.GetData(test.key, test.obj); err != nil {
-			if err.Error() == test.key+ErrDataKeyNotExist {
-				// Do nothing. Recognized error.
-				fmt.Printf("%v (not exist): %#v\n", test.key, val)
-			} else {
-				t.Errorf("i.GetData(%v, %v) = %v", test.key, test.obj, err)
+			if err := i.Decode(strings.NewReader(test.json)); err != nil {
+				t.Errorf("i.Decode(strings.NewReader(%v)) = %v", test.json, err)
+
+				continue
 			}
 
-			continue
-		} else {
+			var val interface{}
+			var err error
+
+			switch testtype {
+			case "ObjArr":
+				index, _ := strconv.Atoi(test.key)
+				val, err = i.GetObj(index, test.obj)
+			case "Data":
+				val, err = i.GetData(test.key, test.obj)
+			}
+
+			if err != nil {
+				if err.Error() == test.key+ErrDataKeyNotExist {
+					// Do nothing. Recognized error.
+					fmt.Printf("%v (not exist): %#v\n", test.key, val)
+				} else {
+					t.Errorf("i.Get"+testtype+"(%v, %v) = %v", test.key, test.obj, err)
+				}
+
+				continue
+			}
+
 			switch v := test.obj.(type) {
 			case *Car:
 				// use the original object.
@@ -122,6 +178,8 @@ func TestGetData(t *testing.T) {
 			}
 		}
 	}
+
+	fmt.Printf("================= [ %s ] ================\n", "END")
 }
 
 func BenchmarkEncode(b *testing.B) {
