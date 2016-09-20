@@ -22,7 +22,7 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 
 ## Usage
 
-### Add a object to the slice and the map. Then, let's encode it:
+### Add an object to the slice and to the map. Then, let's encode it:
 
 ```
 type Car struct {

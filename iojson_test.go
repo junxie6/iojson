@@ -206,18 +206,6 @@ func TestGetObj(t *testing.T) {
 }
 
 func BenchmarkEncode(b *testing.B) {
-	o := NewIOJSON()
-
-	if err := o.AddObjToMap("test", "test"); err != nil {
-		// do something
-	}
-
-	for i := 0; i < b.N; i++ {
-		o.Encode()
-	}
-}
-
-func BenchmarkAddObjToMap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		car := &Car{
 			Name: "Init Car",
