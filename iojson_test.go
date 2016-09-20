@@ -100,7 +100,9 @@ func TestGetData(t *testing.T) {
 func BenchmarkEncode(b *testing.B) {
 	o := NewIOJSON()
 
-	o.AddData("test", "test")
+	if err := o.AddData("test", "test"); err != nil {
+		// do something
+	}
 
 	for i := 0; i < b.N; i++ {
 		o.Encode()
@@ -112,10 +114,18 @@ func BenchmarkAddData(b *testing.B) {
 		car := &Car{
 			Name: "Init Car",
 		}
+
 		o := NewIOJSON()
-		o.AddData("Car", car)
-		o.AddData("Hello", "World")
-		o.AddData("Age", 18)
+
+		if err := o.AddData("Car", car); err != nil {
+		}
+
+		if err := o.AddData("Hello", "World"); err != nil {
+		}
+
+		if err := o.AddData("Age", 18); err != nil {
+		}
+
 		o.Encode()
 	}
 }

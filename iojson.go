@@ -36,9 +36,10 @@ var (
 	IOLimitReaderSize int64 = 2 * MB
 )
 
+// JSONRawArr ...
 type JSONRawArr []*json.RawMessage
 
-// D ...
+// JSONRawMap ...
 // use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied an object.
 type JSONRawMap map[string]*json.RawMessage
 
