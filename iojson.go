@@ -12,6 +12,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	//"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -42,6 +43,7 @@ var (
 
 // D ...
 // use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied a object.
+type OOO []*json.RawMessage
 type D map[string]*json.RawMessage
 
 // IOJSON ...
@@ -49,8 +51,8 @@ type IOJSON struct {
 	Status   bool
 	ErrArr   []string
 	ErrCount int
-	ObjArr   []interface{} // NOTE: do not access this field directly.
-	ObjCount int
+	//ObjArr   []interface{} // NOTE: do not access this field directly.
+	ObjArr OOO // NOTE: do not access this field directly.
 	//sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
 	Data D // NOTE: do not access this field directly.
 }
@@ -59,7 +61,7 @@ type IOJSON struct {
 func NewIOJSON() *IOJSON {
 	return &IOJSON{
 		ErrArr: []string{},
-		ObjArr: []interface{}{},
+		ObjArr: make(OOO, 0),
 		Data:   make(D),
 	}
 }
@@ -71,21 +73,24 @@ func (o *IOJSON) AddError(str string) {
 }
 
 // AddObj ...
-func (o *IOJSON) AddObj(v interface{}) {
-	o.ObjArr = append(o.ObjArr, v)
-	o.ObjCount++
-}
+//func (o *IOJSON) AddObj(v interface{}) {
+//	o.ObjArr = append(o.ObjArr, v)
+//	o.ObjCount++
+//}
 
 // GetObj ...
 // NOTE: I do not see a need for this function yet?
-//func (o *IOJSON) GetObj(k int) (interface{}, error) {
-//	if k < 0 || k >= o.ObjCount {
-//		return nil, errors.New(ErrDataKeyNotExist)
-//	}
-//
-//	// TODO: check array boundary and return error if necessary.
-//	return o.ObjArr[k], nil
-//}
+func (o *IOJSON) GetObj(k int, obj interface{}) (interface{}, error) {
+	if k < 0 || k >= len(o.ObjArr) {
+		return nil, errors.New(ErrDataKeyNotExist)
+	}
+
+	if err := json.NewDecoder(bytes.NewReader(*o.ObjArr[k])).Decode(obj); err != nil {
+		return nil, err
+	}
+
+	return obj, nil
+}
 
 // AddData ...
 func (o *IOJSON) AddData(k string, v interface{}) error {
@@ -154,7 +159,7 @@ func (o *IOJSON) Encode() []byte {
 	} else {
 		// reset to default
 		o.Status = false
-		o.ObjArr = []interface{}{}
+		o.ObjArr = make(OOO, 0)
 		o.Data = make(D)
 	}
 
