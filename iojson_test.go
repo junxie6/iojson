@@ -35,11 +35,12 @@ type TestCase struct {
 
 func GetTestCase(storeType string) []TestCase {
 	return []TestCase{
-		{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "", "My luxury car", "Bag", &Car{Name: "Init Car"}},
-		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "", "World", "", nil},
-		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "Dummy", "World", "", nil},
-		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", "", nil},
-		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", "", nil},
+		//{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "", "My luxury car", "Bag", &Car{}},
+		{`{"` + storeType + `":{"%s":[{"Name":"%s","ItemArr":[{"Name":"%s"}]}]}}`, "Car", "", "My luxury car", "Bag", &[]Car{}},
+		//{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "", "World", "", nil},
+		//{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "Dummy", "World", "", nil},
+		//{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", "", nil},
+		//{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", "", nil},
 	}
 }
 
@@ -93,6 +94,26 @@ func TestGetData(t *testing.T) {
 				} else {
 					fmt.Printf("%v (returned object): %#v\n", reflect.TypeOf(val.(*Car)), val.(*Car).GetName())
 					fmt.Printf("%v (returned object): %#v\n", reflect.TypeOf(val.(*Car).ItemArr[0]), val.(*Car).ItemArr[0].GetName())
+				}
+			case *[]Car:
+				// use the original object.
+				if name := (*test.obj.(*[]Car))[0].GetName(); name != test.want {
+					t.Errorf("%v.GetName() = %v; want = %v", reflect.TypeOf(*test.obj.(*[]Car)), (*test.obj.(*[]Car))[0].GetName(), test.want)
+				} else if name := (*test.obj.(*[]Car))[0].ItemArr[0].GetName(); name != test.want2 {
+					t.Errorf("%v.GetName() = %v; want = %v", reflect.TypeOf((*test.obj.(*[]Car))[0].ItemArr[0]), (*test.obj.(*[]Car))[0].ItemArr[0].GetName(), test.want2)
+				} else {
+					fmt.Printf("%v (original object): %#v\n", reflect.TypeOf(*test.obj.(*[]Car)), (*test.obj.(*[]Car))[0].GetName())
+					fmt.Printf("%v (original object): %#v\n", reflect.TypeOf((*test.obj.(*[]Car))[0].ItemArr[0]), (*test.obj.(*[]Car))[0].ItemArr[0].GetName())
+				}
+
+				// use the returned object.
+				if name := (*val.(*[]Car))[0].GetName(); name != test.want {
+					t.Errorf("%v.GetName() = %v; want = %v", reflect.TypeOf(*val.(*[]Car)), (*val.(*[]Car))[0].GetName(), test.want)
+				} else if name := (*val.(*[]Car))[0].ItemArr[0].GetName(); name != test.want2 {
+					t.Errorf("%v.GetName() = %v; want = %v", reflect.TypeOf((*val.(*[]Car))[0].ItemArr[0]), (*val.(*[]Car))[0].ItemArr[0].GetName(), test.want2)
+				} else {
+					fmt.Printf("%v (returned object): %#v\n", reflect.TypeOf(*val.(*[]Car)), (*val.(*[]Car))[0].GetName())
+					fmt.Printf("%v (returned object): %#v\n", reflect.TypeOf((*val.(*[]Car))[0].ItemArr[0]), (*val.(*[]Car))[0].ItemArr[0].GetName())
 				}
 			case nil:
 				fmt.Printf("%v: %#v\n", test.key, val)
