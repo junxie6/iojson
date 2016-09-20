@@ -1,10 +1,4 @@
 // Package iojson ...
-// when go-json
-// I would AddObj, AddData, then Encode.
-// Then, I would expect it to be converted to JSON string.
-//
-// when json-go
-// I would AddObj, AddData, then Decode.
 package iojson
 
 import (
@@ -16,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	//"sync"
 )
@@ -41,28 +36,28 @@ var (
 	IOLimitReaderSize int64 = 2 * MB
 )
 
+type JSONRawArr []*json.RawMessage
+
 // D ...
-// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied a object.
-type OOO []*json.RawMessage
-type D map[string]*json.RawMessage
+// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied an object.
+type JSONRawMap map[string]*json.RawMessage
 
 // IOJSON ...
 type IOJSON struct {
 	Status   bool
 	ErrArr   []string
 	ErrCount int
-	//ObjArr   []interface{} // NOTE: do not access this field directly.
-	ObjArr OOO // NOTE: do not access this field directly.
-	//sync.RWMutex               // embedded. see http://golang.org/ref/spec#Struct_types
-	Data D // NOTE: do not access this field directly.
+	ObjArr   JSONRawArr // NOTE: do not access this field directly.
+	//sync.RWMutex     // embedded. see http://golang.org/ref/spec#Struct_types
+	Data JSONRawMap // NOTE: do not access this field directly.
 }
 
 // NewIOJSON ...
 func NewIOJSON() *IOJSON {
 	return &IOJSON{
 		ErrArr: []string{},
-		ObjArr: make(OOO, 0),
-		Data:   make(D),
+		ObjArr: make(JSONRawArr, 0),
+		Data:   make(JSONRawMap),
 	}
 }
 
@@ -82,7 +77,7 @@ func (o *IOJSON) AddError(str string) {
 // NOTE: I do not see a need for this function yet?
 func (o *IOJSON) GetObj(k int, obj interface{}) (interface{}, error) {
 	if k < 0 || k >= len(o.ObjArr) {
-		return nil, errors.New(ErrDataKeyNotExist)
+		return nil, errors.New(strconv.Itoa(k) + ErrDataKeyNotExist)
 	}
 
 	if err := json.NewDecoder(bytes.NewReader(*o.ObjArr[k])).Decode(obj); err != nil {
@@ -115,10 +110,6 @@ func (o *IOJSON) AddData(k string, v interface{}) error {
 
 	return nil
 }
-
-//func (o *IOJSON) MarshalJSON() ([]byte, error) {
-//	return json.Marshal(o.Tmp)
-//}
 
 // GetData ...
 func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
@@ -159,18 +150,9 @@ func (o *IOJSON) Encode() []byte {
 	} else {
 		// reset to default
 		o.Status = false
-		o.ObjArr = make(OOO, 0)
-		o.Data = make(D)
+		o.ObjArr = make(JSONRawArr, 0)
+		o.Data = make(JSONRawMap)
 	}
-
-	// TODO: find out the difference between the following three lines and io.Reader.
-	//var b bytes.Buffer
-	//bytes.NewBuffer([]byte("test"))
-	//b := new(bytes.Buffer) // // new takes a type as an argument, allocates enough memory to fit a value of that type, and returns a pointer to it.
-
-	//if err := json.NewEncoder(b).Encode(o); err != nil {
-	//	return []byte(o.JSONFail(err))
-	//}
 
 	var b []byte
 	var err error
