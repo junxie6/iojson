@@ -56,7 +56,7 @@ func GetTestCase(storeType string) []TestCase {
 		{`{"` + storeType + `":[%s]}`, "0", "", "", "", nil},
 	}
 
-	TestCaseMap["Data"] = []TestCase{
+	TestCaseMap["ObjMap"] = []TestCase{
 		// {[]}
 		{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "", "My luxury car", "Bag", &Car{}},
 		{`{"` + storeType + `":{"%s":{"Name":"%s","ItemArr":[{"Name":"%s"}]}}}`, "Car", "Dummy", "My luxury car", "Bag", &Car{}},
@@ -93,10 +93,10 @@ func GetTestCase(storeType string) []TestCase {
 	return v
 }
 
-func TestGetData(t *testing.T) {
+func TestGetObj(t *testing.T) {
 	testTypeArr := []string{
 		"ObjArr",
-		"Data",
+		"ObjMap",
 	}
 
 	for _, testtype := range testTypeArr {
@@ -111,7 +111,7 @@ func TestGetData(t *testing.T) {
 			switch testtype {
 			case "ObjArr":
 				test.json = fmt.Sprintf(test.json, test.want, test.want2)
-			case "Data":
+			case "ObjMap":
 				test.json = fmt.Sprintf(test.json, test.key, test.want, test.want2)
 			}
 			//fmt.Printf("HERE: %v\n", test.json)
@@ -132,13 +132,13 @@ func TestGetData(t *testing.T) {
 			switch testtype {
 			case "ObjArr":
 				index, _ := strconv.Atoi(test.key)
-				val, err = i.GetObj(index, test.obj)
-			case "Data":
-				val, err = i.GetData(test.key, test.obj)
+				val, err = i.GetArrObj(index, test.obj)
+			case "ObjMap":
+				val, err = i.GetMapObj(test.key, test.obj)
 			}
 
 			if err != nil {
-				if err.Error() == test.key+ErrDataKeyNotExist {
+				if err.Error() == test.key+ErrKeyNotExist {
 					// Do nothing. Recognized error.
 					fmt.Printf("%v (not exist): %#v\n", test.key, val)
 				} else if err.Error() == ErrJSONRawIsNil && test.want == "null" {
@@ -208,7 +208,7 @@ func TestGetData(t *testing.T) {
 func BenchmarkEncode(b *testing.B) {
 	o := NewIOJSON()
 
-	if err := o.AddData("test", "test"); err != nil {
+	if err := o.AddMapObj("test", "test"); err != nil {
 		// do something
 	}
 
@@ -217,7 +217,7 @@ func BenchmarkEncode(b *testing.B) {
 	}
 }
 
-func BenchmarkAddData(b *testing.B) {
+func BenchmarkAddMapObj(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		car := &Car{
 			Name: "Init Car",
@@ -225,13 +225,13 @@ func BenchmarkAddData(b *testing.B) {
 
 		o := NewIOJSON()
 
-		if err := o.AddData("Car", car); err != nil {
+		if err := o.AddMapObj("Car", car); err != nil {
 		}
 
-		if err := o.AddData("Hello", "World"); err != nil {
+		if err := o.AddMapObj("Hello", "World"); err != nil {
 		}
 
-		if err := o.AddData("Age", 18); err != nil {
+		if err := o.AddMapObj("Age", 18); err != nil {
 		}
 
 		o.Encode()

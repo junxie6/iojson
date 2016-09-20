@@ -27,9 +27,9 @@ const (
 )
 
 const (
-	// ErrDataKeyNotExist ...
-	ErrDataKeyNotExist = " key does not exist"
-	ErrJSONRawIsNil    = "jsonRaw is nil"
+	// ErrKeyNotExist ...
+	ErrKeyNotExist  = " key does not exist"
+	ErrJSONRawIsNil = "jsonRaw is nil"
 )
 
 var (
@@ -51,7 +51,7 @@ type IOJSON struct {
 	ErrCount     int
 	ObjArr       JSONRawArr // NOTE: do not access this field directly.
 	sync.RWMutex            // embedded. see http://golang.org/ref/spec#Struct_types
-	Data         JSONRawMap // NOTE: do not access this field directly.
+	ObjMap       JSONRawMap // NOTE: do not access this field directly.
 }
 
 // NewIOJSON ...
@@ -59,7 +59,7 @@ func NewIOJSON() *IOJSON {
 	return &IOJSON{
 		ErrArr: []string{},
 		ObjArr: make(JSONRawArr, 0),
-		Data:   make(JSONRawMap),
+		ObjMap: make(JSONRawMap),
 	}
 }
 
@@ -69,8 +69,8 @@ func (o *IOJSON) AddError(str string) {
 	o.ErrCount++
 }
 
-// AddObj ...
-func (o *IOJSON) AddObj(v interface{}) error {
+// AddArrObj ...
+func (o *IOJSON) AddArrObj(v interface{}) error {
 	var b []byte
 	var err error
 
@@ -79,26 +79,21 @@ func (o *IOJSON) AddObj(v interface{}) error {
 	}
 
 	o.ObjArr = append(o.ObjArr, o.NewRawMessage(b))
-
 	return nil
 }
 
-// GetObj ...
-func (o *IOJSON) GetObj(k int, obj interface{}) (interface{}, error) {
+// GetArrObj ...
+func (o *IOJSON) GetArrObj(k int, obj interface{}) (interface{}, error) {
 	if k < 0 || k >= len(o.ObjArr) {
-		return nil, errors.New(strconv.Itoa(k) + ErrDataKeyNotExist)
+		return nil, errors.New(strconv.Itoa(k) + ErrKeyNotExist)
 	}
 
-	var jsonRaw *json.RawMessage
-
-	jsonRaw = o.ObjArr[k]
-
 	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
-	return obj, o.populateObj(jsonRaw, &obj)
+	return obj, o.populateObj(o.ObjArr[k], &obj)
 }
 
-// AddData ...
-func (o *IOJSON) AddData(k string, v interface{}) error {
+// AddMapObj ...
+func (o *IOJSON) AddMapObj(k string, v interface{}) error {
 	o.Lock()
 	defer o.Unlock()
 
@@ -109,21 +104,21 @@ func (o *IOJSON) AddData(k string, v interface{}) error {
 		return err
 	}
 
-	o.Data[k] = o.NewRawMessage(b)
+	o.ObjMap[k] = o.NewRawMessage(b)
 
 	return nil
 }
 
-// GetData ...
-func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
+// GetMapObj ...
+func (o *IOJSON) GetMapObj(k string, obj interface{}) (interface{}, error) {
 	o.RLock()
 	defer o.RUnlock()
 
 	var jsonRaw *json.RawMessage
 	var ok bool
 
-	if jsonRaw, ok = o.Data[k]; !ok {
-		return nil, errors.New(k + ErrDataKeyNotExist)
+	if jsonRaw, ok = o.ObjMap[k]; !ok {
+		return nil, errors.New(k + ErrKeyNotExist)
 	}
 
 	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
@@ -167,7 +162,7 @@ func (o *IOJSON) Encode() []byte {
 		// reset to default
 		o.Status = false
 		o.ObjArr = make(JSONRawArr, 0)
-		o.Data = make(JSONRawMap)
+		o.ObjMap = make(JSONRawMap)
 	}
 
 	//
