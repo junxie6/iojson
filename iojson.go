@@ -29,6 +29,7 @@ const (
 const (
 	// ErrDataKeyNotExist ...
 	ErrDataKeyNotExist = " key does not exist"
+	ErrJSONRawIsNil    = "jsonRaw is nil"
 )
 
 var (
@@ -77,8 +78,7 @@ func (o *IOJSON) AddObj(v interface{}) error {
 		return err
 	}
 
-	j := json.RawMessage(b)
-	o.ObjArr = append(o.ObjArr, &j)
+	o.ObjArr = append(o.ObjArr, o.NewRawMessage(b))
 
 	return nil
 }
@@ -109,13 +109,7 @@ func (o *IOJSON) AddData(k string, v interface{}) error {
 		return err
 	}
 
-	j := json.RawMessage(b)
-	o.Data[k] = &j
-
-	// NOTE: another way of assigning value to *json.RawMessage.
-	//jPtr := new(json.RawMessage)
-	//*jPtr = b.Bytes()
-	//o.Data[k] = jPtr
+	o.Data[k] = o.NewRawMessage(b)
 
 	return nil
 }
@@ -136,8 +130,22 @@ func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	return obj, o.populateObj(jsonRaw, &obj)
 }
 
+func (o *IOJSON) NewRawMessage(b []byte) *json.RawMessage {
+	j := json.RawMessage(b)
+	return &j
+
+	// NOTE: another way of assigning value to *json.RawMessage.
+	//jPtr := new(json.RawMessage)
+	//*jPtr = b
+	//return jPtr
+}
+
 // populateObj ...
 func (o *IOJSON) populateObj(jsonRaw *json.RawMessage, obj interface{}) error {
+	if jsonRaw == nil {
+		return errors.New(ErrJSONRawIsNil)
+	}
+
 	if err := json.NewDecoder(bytes.NewReader(*jsonRaw)).Decode(obj); err != nil {
 		return err
 	}

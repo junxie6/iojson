@@ -48,6 +48,12 @@ func GetTestCase(storeType string) []TestCase {
 		{`{"` + storeType + `":[%s]}`, "0", "", "123.8", "", nil},
 		// null
 		{`{"` + storeType + `":[%s]}`, "0", "", "null", "", nil},
+		// {}
+		{`{"` + storeType + `":[%s]}`, "0", "", "{}", "", nil},
+		// ""
+		{`{"` + storeType + `":["%s"]}`, "0", "", "", "", nil},
+		//
+		{`{"` + storeType + `":[%s]}`, "0", "", "", "", nil},
 	}
 
 	TestCaseMap["Data"] = []TestCase{
@@ -63,6 +69,18 @@ func GetTestCase(storeType string) []TestCase {
 		// 0
 		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", "", nil},
 		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", "", nil},
+		// null
+		{`{"` + storeType + `":{"%s":%s}}`, "Null", "", "null", "", nil},
+		{`{"` + storeType + `":{"%s":%s}}`, "Null", "Dummy", "null", "", nil},
+		// {}
+		{`{"` + storeType + `":{"%s":%s}}`, "Braces", "", "{}", "", nil},
+		{`{"` + storeType + `":{"%s":%s}}`, "Braces", "Dummy", "{}", "", nil},
+		// ""
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Empty", "", "", "", nil},
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Empty", "Dummy", "", "", nil},
+		//
+		{`{"` + storeType + `":{}}`, "None", "", "", "", nil},
+		{`{"` + storeType + `":{}}`, "None", "Dummy", "", "", nil},
 	}
 
 	var v []TestCase
@@ -123,12 +141,17 @@ func TestGetData(t *testing.T) {
 				if err.Error() == test.key+ErrDataKeyNotExist {
 					// Do nothing. Recognized error.
 					fmt.Printf("%v (not exist): %#v\n", test.key, val)
+				} else if err.Error() == ErrJSONRawIsNil && test.want == "null" {
+					// Do nothing. Recognized error.
+					fmt.Printf("%v (null): %#v\n", test.key, val)
 				} else {
 					t.Errorf("i.Get"+testtype+"(%v, %v) = %v", test.key, test.obj, err)
 				}
 
 				continue
 			}
+
+			//continue
 
 			switch v := test.obj.(type) {
 			case *Car:
