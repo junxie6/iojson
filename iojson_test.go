@@ -8,27 +8,43 @@ import (
 )
 
 type Car struct {
-	Name string
+	Name    string
+	ItemArr []Item
 }
 
 func (c *Car) GetName() string {
 	return c.Name
 }
 
-func TestGetData(t *testing.T) {
-	var tests = []struct {
-		json        string
-		key         string
-		keyNotExist string
-		want        string
-		obj         interface{}
-	}{
-		{`{"Data":{"%s":{"Name":"%s"}}}`, "Car", "", "BMW", &Car{Name: "Init Car"}},
-		{`{"Data":{"%s":{"Name":"%s"}}}`, "Car", "Dummy", "BMW", &Car{Name: "Init Car"}},
-		{`{"Data":{"%s":"%s"}}`, "Hello", "", "World", nil},
-		{`{"Data":{"%s":%s}}`, "Amt", "", "123.8", nil},
-		{`{"Data":{"%s":%s}}`, "Amt", "Dummy", "123.8", nil},
+type Item struct {
+	Name string
+}
+
+func (i *Item) GetName() string {
+	return i.Name
+}
+
+type TestCase struct {
+	json        string
+	key         string
+	keyNotExist string
+	want        string
+	obj         interface{}
+}
+
+func GetTestCase(storeType string) []TestCase {
+	return []TestCase{
+		{`{"` + storeType + `":{"%s":{"Name":"%s"}}}`, "Car", "", "My luxury car", &Car{Name: "Init Car"}},
+		{`{"` + storeType + `":{"%s":{"Name":"%s"}}}`, "Car", "Dummy", "My luxury car", &Car{Name: "Init Car"}},
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "", "World", nil},
+		{`{"` + storeType + `":{"%s":"%s"}}`, "Hello", "Dummy", "World", nil},
+		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "", "123.8", nil},
+		{`{"` + storeType + `":{"%s":%s}}`, "Amt", "Dummy", "123.8", nil},
 	}
+}
+
+func TestGetData(t *testing.T) {
+	var tests = GetTestCase("Data")
 
 	for _, test := range tests {
 		//fmt.Printf("HERE: %v\n", reflect.TypeOf(test.obj))

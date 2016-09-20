@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	//"sync"
+	"sync"
 )
 
 // Size constants
@@ -44,12 +44,12 @@ type JSONRawMap map[string]*json.RawMessage
 
 // IOJSON ...
 type IOJSON struct {
-	Status   bool
-	ErrArr   []string
-	ErrCount int
-	ObjArr   JSONRawArr // NOTE: do not access this field directly.
-	//sync.RWMutex     // embedded. see http://golang.org/ref/spec#Struct_types
-	Data JSONRawMap // NOTE: do not access this field directly.
+	Status       bool
+	ErrArr       []string
+	ErrCount     int
+	ObjArr       JSONRawArr // NOTE: do not access this field directly.
+	sync.RWMutex            // embedded. see http://golang.org/ref/spec#Struct_types
+	Data         JSONRawMap // NOTE: do not access this field directly.
 }
 
 // NewIOJSON ...
@@ -89,9 +89,8 @@ func (o *IOJSON) GetObj(k int, obj interface{}) (interface{}, error) {
 
 // AddData ...
 func (o *IOJSON) AddData(k string, v interface{}) error {
-	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
-	//o.Lock()
-	//defer o.Unlock()
+	o.Lock()
+	defer o.Unlock()
 
 	var b []byte
 	var err error
@@ -113,24 +112,23 @@ func (o *IOJSON) AddData(k string, v interface{}) error {
 
 // GetData ...
 func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
-	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
-	//o.RLock()
-	//defer o.RUnlock()
+	o.RLock()
+	defer o.RUnlock()
+
+	var jsonRaw *json.RawMessage
+	var ok bool
+
+	if jsonRaw, ok = o.Data[k]; !ok {
+		return nil, errors.New(k + ErrDataKeyNotExist)
+	}
 
 	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
-	return obj, o.populateObj(k, &obj)
+	return obj, o.populateObj(jsonRaw, &obj)
 }
 
 // PopulateObj ...
-// Populate object
-func (o *IOJSON) populateObj(k string, obj interface{}) error {
-	// NOTE: we probably do not need to lock if this tool is called inside each go goroutine?
-	//o.RLock()
-	//defer o.RUnlock()
-
-	if v, ok := o.Data[k]; !ok {
-		return errors.New(k + ErrDataKeyNotExist)
-	} else if err := json.NewDecoder(bytes.NewReader(*v)).Decode(obj); err != nil {
+func (o *IOJSON) populateObj(jsonRaw *json.RawMessage, obj interface{}) error {
+	if err := json.NewDecoder(bytes.NewReader(*jsonRaw)).Decode(obj); err != nil {
 		return err
 	}
 
@@ -154,6 +152,7 @@ func (o *IOJSON) Encode() []byte {
 		o.Data = make(JSONRawMap)
 	}
 
+	//
 	var b []byte
 	var err error
 
