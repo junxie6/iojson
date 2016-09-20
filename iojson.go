@@ -68,23 +68,32 @@ func (o *IOJSON) AddError(str string) {
 }
 
 // AddObj ...
-//func (o *IOJSON) AddObj(v interface{}) {
-//	o.ObjArr = append(o.ObjArr, v)
-//	o.ObjCount++
-//}
+func (o *IOJSON) AddObj(v interface{}) error {
+	var b []byte
+	var err error
+
+	if b, err = json.Marshal(v); err != nil {
+		return err
+	}
+
+	j := json.RawMessage(b)
+	o.ObjArr = append(o.ObjArr, &j)
+
+	return nil
+}
 
 // GetObj ...
-// NOTE: I do not see a need for this function yet?
 func (o *IOJSON) GetObj(k int, obj interface{}) (interface{}, error) {
 	if k < 0 || k >= len(o.ObjArr) {
 		return nil, errors.New(strconv.Itoa(k) + ErrDataKeyNotExist)
 	}
 
-	if err := json.NewDecoder(bytes.NewReader(*o.ObjArr[k])).Decode(obj); err != nil {
-		return nil, err
-	}
+	var jsonRaw *json.RawMessage
 
-	return obj, nil
+	jsonRaw = o.ObjArr[k]
+
+	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
+	return obj, o.populateObj(jsonRaw, &obj)
 }
 
 // AddData ...
@@ -126,7 +135,7 @@ func (o *IOJSON) GetData(k string, obj interface{}) (interface{}, error) {
 	return obj, o.populateObj(jsonRaw, &obj)
 }
 
-// PopulateObj ...
+// populateObj ...
 func (o *IOJSON) populateObj(jsonRaw *json.RawMessage, obj interface{}) error {
 	if err := json.NewDecoder(bytes.NewReader(*jsonRaw)).Decode(obj); err != nil {
 		return err
