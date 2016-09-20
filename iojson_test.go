@@ -132,9 +132,9 @@ func TestGetObj(t *testing.T) {
 			switch testtype {
 			case "ObjArr":
 				index, _ := strconv.Atoi(test.key)
-				val, err = i.GetArrObj(index, test.obj)
+				val, err = i.GetObjFromArr(index, test.obj)
 			case "ObjMap":
-				val, err = i.GetMapObj(test.key, test.obj)
+				val, err = i.GetObjFromMap(test.key, test.obj)
 			}
 
 			if err != nil {
@@ -208,7 +208,7 @@ func TestGetObj(t *testing.T) {
 func BenchmarkEncode(b *testing.B) {
 	o := NewIOJSON()
 
-	if err := o.AddMapObj("test", "test"); err != nil {
+	if err := o.AddObjToMap("test", "test"); err != nil {
 		// do something
 	}
 
@@ -217,7 +217,7 @@ func BenchmarkEncode(b *testing.B) {
 	}
 }
 
-func BenchmarkAddMapObj(b *testing.B) {
+func BenchmarkAddObjToMap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		car := &Car{
 			Name: "Init Car",
@@ -225,13 +225,13 @@ func BenchmarkAddMapObj(b *testing.B) {
 
 		o := NewIOJSON()
 
-		if err := o.AddMapObj("Car", car); err != nil {
+		if err := o.AddObjToMap("Car", car); err != nil {
 		}
 
-		if err := o.AddMapObj("Hello", "World"); err != nil {
+		if err := o.AddObjToMap("Hello", "World"); err != nil {
 		}
 
-		if err := o.AddMapObj("Age", 18); err != nil {
+		if err := o.AddObjToMap("Age", 18); err != nil {
 		}
 
 		o.Encode()

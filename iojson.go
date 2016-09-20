@@ -69,8 +69,8 @@ func (o *IOJSON) AddError(str string) {
 	o.ErrCount++
 }
 
-// AddArrObj ...
-func (o *IOJSON) AddArrObj(v interface{}) error {
+// AddObjToArr ...
+func (o *IOJSON) AddObjToArr(v interface{}) error {
 	var b []byte
 	var err error
 
@@ -82,8 +82,8 @@ func (o *IOJSON) AddArrObj(v interface{}) error {
 	return nil
 }
 
-// GetArrObj ...
-func (o *IOJSON) GetArrObj(k int, obj interface{}) (interface{}, error) {
+// GetObjFromArr ...
+func (o *IOJSON) GetObjFromArr(k int, obj interface{}) (interface{}, error) {
 	if k < 0 || k >= len(o.ObjArr) {
 		return nil, errors.New(strconv.Itoa(k) + ErrKeyNotExist)
 	}
@@ -92,8 +92,8 @@ func (o *IOJSON) GetArrObj(k int, obj interface{}) (interface{}, error) {
 	return obj, o.populateObj(o.ObjArr[k], &obj)
 }
 
-// AddMapObj ...
-func (o *IOJSON) AddMapObj(k string, v interface{}) error {
+// AddObjToMap ...
+func (o *IOJSON) AddObjToMap(k string, v interface{}) error {
 	o.Lock()
 	defer o.Unlock()
 
@@ -109,8 +109,8 @@ func (o *IOJSON) AddMapObj(k string, v interface{}) error {
 	return nil
 }
 
-// GetMapObj ...
-func (o *IOJSON) GetMapObj(k string, obj interface{}) (interface{}, error) {
+// GetObjFromMap ...
+func (o *IOJSON) GetObjFromMap(k string, obj interface{}) (interface{}, error) {
 	o.RLock()
 	defer o.RUnlock()
 
