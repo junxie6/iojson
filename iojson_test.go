@@ -115,6 +115,24 @@ func TestAddObjToArr(t *testing.T) {
 	}
 }
 
+func TestAddObjToMap(t *testing.T) {
+	s1 := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":null},"Item":{"Name":"Bag","ItemArr":null}}}`
+
+	car := &Car{Name: "My luxury car"}
+	item := &Car{Name: "Bag"}
+
+	o := NewIOJSON()
+
+	o.AddObjToMap("Car", car)
+	o.AddObjToMap("Item", item)
+
+	if ok, err := util.JSONDeepEqual(o.EncodeString(), s1); err != nil {
+		t.Errorf("err: %v", err)
+	} else if !ok {
+		t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
+	}
+}
+
 func TestGetObj(t *testing.T) {
 	testTypeArr := []string{
 		"ObjArr",
