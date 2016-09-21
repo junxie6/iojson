@@ -249,6 +249,7 @@ var gMux *http.ServeMux
 func srvRoot(w http.ResponseWriter, r *http.Request) {
 	o := r.Context().Value(iojson.CTXKey).(*iojson.IOJSON)
 	o.AddObjToMap("Hello", "World")
+	o.AddObjToMap("Year", 2016)
 
 	// NOTE: do not call o.Echo(w) if you are using iojson.EchoHandler middleware. Because it will call it for you.
 }
@@ -280,5 +281,5 @@ func main() {
 **Sample outout:**
 
 ```
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Hello":"World"}}
+{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Hello":"World","Year":2016}}
 ```
