@@ -7,7 +7,7 @@ iojson provides a convenient way to exchange data between your client and server
 
 iojson also provides a HTTP middleware function, which works with [Alice](https://github.com/justinas/alice) (a famous middleware chainer). See examples below.
 
-## How the uniform format looks like?
+## How does the uniform format look like?
 
 ```
 {
