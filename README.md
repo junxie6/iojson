@@ -227,7 +227,7 @@ func main() {
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
 ```
 
-### Using the middleware provided by iojson example:
+### Using the iojson.EchoHandler middleware:
 
 iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
 
