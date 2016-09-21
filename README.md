@@ -3,104 +3,166 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/junhsieh/iojson)](https://goreportcard.com/report/github.com/junhsieh/iojson)
 [![GoDoc](https://godoc.org/github.com/junhsieh/iojson?status.svg)](https://godoc.org/github.com/junhsieh/iojson)
 
-iojson provides a convenient way to exchange data between your client and server through a uniform JSON format. It helps you to encode data from some Go structs to a JSON string and to decode data from a JSON string to some Go structs. iojson supports storing Go objects to a slice or to a map, which means you could reference your object either by a slice index or by a map key. After populating data from JSON to Go objects, the methods of the objects remained working.
+iojson provides a convenient way to exchange data between your client and server through a uniform JSON format. It helps you to encode data from Go structs to a JSON string and to decode data from a JSON string to Go structs. iojson supports storing Go objects to a slice or to a map, which means you could reference your object either by a slice index or by a map key according to your preference. After populating data from JSON to Go objects, the methods of the objects remained working.
 
 iojson also provides a HTTP middleware function, which works with [Alice](https://github.com/justinas/alice) (a famous middleware chainer).
 
 ## How the uniform format looks like?
 
 ```
-{  
-    "Status":true,
-    "ErrArr":[],
-    "ErrCount":0,
-    "ObjArr":[],
-    "ObjCount":1,
-    "Data":{}
+{
+    "Status": true,
+    "ErrArr": [],
+    "ErrCount": 0,
+    "ObjArr": [],
+    "ObjMap": {}
 }
 ```
 
 ## Usage
 
-### Add an object to the slice and to the map. Then, let's encode it:
+### packages and structure definitions for examples:
 
 ```
-type Car struct {
-	Name string
-}
-
-car := &Car{
-	Name: "Init car name",
-}
-
-i := iojson.NewIOJSON()
-i.AddObj(car)         // add to the slice.
-i.AddData("car", car) // add to the map.
-
-fmt.Printf("%s\n", i.Encode()) // encode the data.
-```
-
-**Sample output:**
-
-```
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"Init car name"}],"ObjCount":1,"Data":{"car":{"Name":"Init car name"}}}
-```
-
-### Show how to populate data to some existing live objects:
-
-```
-package main
-
 import (
 	"fmt"
+	"github.com/junhsieh/iojson"
+	"net/http"
+	"strconv"
 	"strings"
 )
 
-import (
-	"github.com/junhsieh/iojson"
-)
+func NewCar() *Car {
+	return &Car{ItemArr: make([]Item, 0)}
+}
 
 type Car struct {
-	Name string
+	Name    string
+	ItemArr []Item
 }
 
 func (c *Car) GetName() string {
 	return c.Name
 }
 
-type House struct {
+func NewItem() *Item {
+	return &Item{}
+}
+
+type Item struct {
 	Name string
 }
 
-func (h *House) GetName() string {
-	return h.Name
+func (i *Item) GetName() string {
+	return i.Name
 }
+```
 
+### Add an object to the slice. Then, encode it:
+
+```
 func main() {
-	json := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car"}],"ObjCount":1,"Data":{"house":{"Name":"My luxury house"}}}`
+	item := NewItem()
+	item.Name = "Bag"
 
-	car := &Car{
-		Name: "Init car name",
-	}
-	house := &House{
-		Name: "Init house name",
-	}
+	car := NewCar()
+	car.Name = "My luxury car"
+	car.ItemArr = append(car.ItemArr, *item)
+
+	o := iojson.NewIOJSON()
+	o.AddObjToArr(car) // add the car object to the slice.
+
+	fmt.Printf("%s\n", o.EncodePretty()) // encode data with nice format or call o.Encode().
+}
+```
+
+**Sample output:**
+
+```
+{
+    "Status": true,
+    "ErrArr": [],
+    "ErrCount": 0,
+    "ObjArr": [
+        {
+            "Name": "My luxury car",
+            "ItemArr": [
+                {
+                    "Name": "Bag"
+                }
+            ]
+        }
+    ],
+    "ObjMap": {}
+}
+```
+
+### Add an object to the map. Then, encode it:
+
+```
+func main() {
+	item := NewItem()
+	item.Name = "Bag"
+
+	car := NewCar()
+	car.Name = "My luxury car"
+	car.ItemArr = append(car.ItemArr, *item)
+
+	o := iojson.NewIOJSON()
+	o.AddObjToMap("Car", car) // add the car object to the map.
+
+	fmt.Printf("%s\n", o.EncodePretty()) // encode data with nice format or call o.Encode().
+}
+```
+
+**Sample output:**
+
+```
+{
+    "Status": true,
+    "ErrArr": [],
+    "ErrCount": 0,
+    "ObjArr": [],
+    "ObjMap": {
+        "Car": {
+            "Name": "My luxury car",
+            "ItemArr": [
+                {
+                    "Name": "Bag"
+                }
+            ]
+        }
+    }
+}
+```
+
+### Show how to populate data to some existing live objects:
+
+```
+func main() {
+	jsonStr := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}],"ObjMap":{}}`
+
+	car := NewCar()
 
 	i := iojson.NewIOJSON()
-	i.AddObj(car) // add car to the slice. Data will be populated after decoded.
 
-	if err := i.Decode(strings.NewReader(json)); err != nil {
+	if err := i.Decode(strings.NewReader(jsonStr)); err != nil {
+		fmt.Printf("err: %s\n", err.Error())
+	}
+
+	// populating data to a live car object.
+	if v, err := i.GetObjFromArr(0, car); err != nil {
 		fmt.Printf("err: %s\n", err.Error())
 	} else {
-		// a live car object.
-		fmt.Printf("car: %s\n", car.GetName())
+		fmt.Printf("car (original): %s\n", car.GetName())
+		fmt.Printf("car (returned): %s\n", v.(*Car).GetName())
 
-		if v, err := i.GetData("house", house); err != nil {
-			fmt.Printf("err: %s\n", err.Error())
-		} else {
-			// a live house object.
-			fmt.Printf("house: %s\n", house.GetName())
-			fmt.Printf("house: %s\n", v.(*House).GetName())
+		for k, item := range car.ItemArr {
+			fmt.Printf("ItemArr[%d] of car (original): %s\n", k, item.GetName())
+		}
+
+		for k, item := range v.(*Car).ItemArr {
+			fmt.Printf("ItemArr[%d] of car (returned): %s\n", k, item.GetName())
 		}
 	}
 }
@@ -109,72 +171,43 @@ func main() {
 **Sample output:**
 
 ```
-car: My luxury car
-house: My luxury house
-house: My luxury house
+car (original): My luxury car
+car (returned): My luxury car
+ItemArr[0] of car (original): Bag
+ItemArr[1] of car (original): Pen
+ItemArr[0] of car (returned): Bag
+ItemArr[1] of car (returned): Pen
 ```
 
-### This complete example shows converting from JSON to a live Go object through iojson.ObjArr:
+### This complete example shows how to use iojson with HTTP handler:
 
 ```
-package main
-
-import (
-	"fmt"
-	"net/http"
-)
-
-import (
-	"github.com/junhsieh/iojson"
-)
-
-// Car ...
-type Car struct {
-	Name   string
-	Wheels []Wheel
-}
-
-// GetName ...
-func (c *Car) GetName() string {
-	return c.Name
-}
-
-// Wheel ...
-type Wheel struct {
-	Size string
-}
-
-// GetSize ...
-func (w *Wheel) GetSize() string {
-	return w.Size
-}
-
 func srvRoot(w http.ResponseWriter, r *http.Request) {
-	car := &Car{
-		Name: "Init car name",
-		Wheels: []Wheel{
-			Wheel{Size: "Init wheel size 0"},
-			Wheel{Size: "Init wheel size 1"},
-		},
-	}
+	car := NewCar()
 
-	i := iojson.NewIOJSON()
-	i.AddObj(car) // car data will be populated once it's decoded.
+	i := iojson.NewIOJSON() // for input
+	o := iojson.NewIOJSON() // for output
 
 	if err := i.Decode(r.Body); err != nil {
-		w.Write([]byte(err.Error()))
-	} else {
-		// showing a live object with working methods.
-		w.Write([]byte("=========\n"))
-		fmt.Fprintf(w, "Car name: %s\n", car.GetName())
-		fmt.Fprintf(w, "Wheel size: %s\n", car.Wheels[0].GetSize())
-		fmt.Fprintf(w, "Wheel size: %s\n", car.Wheels[1].GetSize())
-
-		// iojson can also encode itself and echo.
-		w.Write([]byte("=========\n"))
-		i.Echo(w)
-		w.Write([]byte("\n"))
+		o.AddError(err.Error())
+		o.Echo(w)
+		return
 	}
+
+	// populating data to a live car object.
+	if _, err := i.GetObjFromMap("Car", car); err != nil {
+		o.AddError(err.Error())
+		o.Echo(w)
+		return
+	}
+
+	o.AddObjToMap("Car.Name", car.GetName())
+
+	for k, item := range car.ItemArr {
+		o.AddObjToMap("Car.ItemArr["+strconv.Itoa(k)+"]", item.GetName())
+	}
+
+	o.Echo(w)
 }
 
 func main() {
@@ -185,17 +218,12 @@ func main() {
 
 **Run curl command:**
 
-\# curl -H "Content-Type: application/json; charset=UTF-8" -X POST -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name": "My luxury car","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"Data":{}}' http://127.0.0.1:8080/
+\# curl -H "Content-Type: application/json; charset=UTF-8" -X POST -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}}}' http://127.0.0.1:8080/
 
 **Sample outout:**
 
 ```
-=========
-Car name: BMW
-Wheel size: 18 inches
-Wheel size: 28 inches
-=========
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"BMW","Wheels":[{"Size":"18 inches"},{"Size":"28 inches"}]}],"ObjCount":1,"Data":{}}
+{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
 ```
 
 ### Middleware sample:
@@ -219,7 +247,7 @@ var gMux *http.ServeMux
 
 func srvRoot(w http.ResponseWriter, r *http.Request) {
 	o := r.Context().Value(iojson.CTXKey).(*iojson.IOJSON)
-	o.AddData("Hello", "World")
+	o.AddObjToMap("Hello", "World")
 
 	// showing how to add an error message.
 	if 1 == 2 {

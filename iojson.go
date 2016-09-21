@@ -179,7 +179,7 @@ func (o *IOJSON) Encode() []byte {
 func (o *IOJSON) EncodePretty() []byte {
 	var b bytes.Buffer
 
-	if err := json.Indent(&b, o.Encode(), "", "  "); err != nil {
+	if err := json.Indent(&b, o.Encode(), "", "    "); err != nil {
 		return []byte(o.JSONFail(err))
 	}
 
