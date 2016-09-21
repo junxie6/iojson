@@ -98,7 +98,7 @@ func GetTestCase(storeType string) []TestCase {
 }
 
 func TestAddObjToArr(t *testing.T) {
-	s1 := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car","ItemArr":null},{"Name":"Bag","ItemArr":null}],"ObjMap":{}}`
+	s1 := `{"Status":true,"ErrArr":[],"ObjArr":[{"Name":"My luxury car","ItemArr":null},{"Name":"Bag","ItemArr":null}],"ObjMap":{}}`
 
 	car := &Car{Name: "My luxury car"}
 	item := &Car{Name: "Bag"}
@@ -116,7 +116,7 @@ func TestAddObjToArr(t *testing.T) {
 }
 
 func TestAddObjToMap(t *testing.T) {
-	s1 := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":null},"Item":{"Name":"Bag","ItemArr":null}}}`
+	s1 := `{"Status":true,"ErrArr":[],"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":null},"Item":{"Name":"Bag","ItemArr":null}}}`
 
 	car := &Car{Name: "My luxury car"}
 	item := &Car{Name: "Bag"}

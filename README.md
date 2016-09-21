@@ -15,7 +15,6 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 {
     "Status": false,
     "ErrArr": [],
-    "ErrCount": 0,
     "ObjArr": [],
     "ObjMap": {}
 }
@@ -85,7 +84,6 @@ func main() {
 {
     "Status": true,
     "ErrArr": [],
-    "ErrCount": 0,
     "ObjArr": [
         {
             "Name": "My luxury car",
@@ -124,7 +122,6 @@ func main() {
 {
     "Status": true,
     "ErrArr": [],
-    "ErrCount": 0,
     "ObjArr": [],
     "ObjMap": {
         "Car": {
@@ -143,7 +140,7 @@ func main() {
 
 ```
 func main() {
-	jsonStr := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}],"ObjMap":{}}`
+	jsonStr := `{"Status":true,"ErrArr":[],"ObjArr":[{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}],"ObjMap":{}}`
 
 	car := NewCar()
 
@@ -221,12 +218,12 @@ func main() {
 
 **Run curl command:**
 
-\# curl -H "Content-Type: application/json; charset=UTF-8" -X POST -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}}}' http://127.0.0.1:8080/
+\# curl -H "Content-Type: application/json; charset=UTF-8" -X POST -d '{"Status":true,"ErrArr":[],"ObjArr":[],"ObjMap":{"Car":{"Name":"My luxury car","ItemArr":[{"Name":"Bag"},{"Name":"Pen"}]}}}' http://127.0.0.1:8080/
 
 **Sample outout:**
 
 ```
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
+{"Status":true,"ErrArr":[],"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
 ```
 
 ### Using the iojson.EchoHandler middleware:
@@ -283,5 +280,5 @@ func main() {
 **Sample outout:**
 
 ```
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Hello":"World","Year":2016}}
+{"Status":true,"ErrArr":[],"ObjArr":[],"ObjMap":{"Hello":"World","Year":2016}}
 ```

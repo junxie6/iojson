@@ -45,7 +45,6 @@ type JSONRawMap map[string]*json.RawMessage
 type IOJSON struct {
 	Status       bool
 	ErrArr       []string
-	ErrCount     int
 	ObjArr       JSONRawArr // NOTE: do not access this field directly.
 	sync.RWMutex            // embedded. see http://golang.org/ref/spec#Struct_types
 	ObjMap       JSONRawMap // NOTE: do not access this field directly.
@@ -63,7 +62,6 @@ func NewIOJSON() *IOJSON {
 // AddError ...
 func (o *IOJSON) AddError(str string) {
 	o.ErrArr = append(o.ErrArr, str)
-	o.ErrCount++
 }
 
 // AddObjToArr ...
@@ -148,18 +146,18 @@ func (o *IOJSON) populateObj(jsonRaw *json.RawMessage, obj interface{}) error {
 // JSONFail ...
 func (o *IOJSON) JSONFail(err error) string {
 	log.Printf("err: %v", err.Error())
-	return `{"Status":true,"ErrArr":["Encode failed. Check log"],"ErrCount":1,"ObjArr":[],"ObjMap":{}}`
+	return `{"Status":false,"ErrArr":["Encode failed. Check log"],"ObjArr":[],"ObjMap":{}}`
 }
 
 // Encode encodes the object itself to JSON and return []byte.
 func (o *IOJSON) Encode() []byte {
-	if o.ErrCount == 0 {
-		o.Status = true
-	} else {
+	if len(o.ErrArr) > 0 {
 		// reset to default
 		o.Status = false
 		o.ObjArr = make(JSONRawArr, 0)
 		o.ObjMap = make(JSONRawMap)
+	} else {
+		o.Status = true
 	}
 
 	//
