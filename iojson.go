@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -36,8 +35,7 @@ var (
 	IOLimitReaderSize int64 = 2 * MB
 )
 
-// JSONRawArr ...
-// use *json.RawMessage instead of interface{} to delay JSON decoding until we supplied an object.
+// JSONRawArr uses *json.RawMessage (instead of interface{}) to delay JSON decoding until we supplied an object.
 type JSONRawArr []*json.RawMessage
 
 // JSONRawMap ...
@@ -87,7 +85,7 @@ func (o *IOJSON) GetObjFromArr(k int, obj interface{}) (interface{}, error) {
 		return nil, errors.New(strconv.Itoa(k) + ErrKeyNotExist)
 	}
 
-	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
+	// NOTE: the primitive types (int, string) will not work if obj (instead of &obj) is used.
 	return obj, o.populateObj(o.ObjArr[k], &obj)
 }
 
@@ -120,7 +118,7 @@ func (o *IOJSON) GetObjFromMap(k string, obj interface{}) (interface{}, error) {
 		return nil, errors.New(k + ErrKeyNotExist)
 	}
 
-	// NOTE: the primitive types (int, string) will not work if use obj instead of &obj.
+	// NOTE: the primitive types (int, string) will not work if obj (instead of &obj) is used.
 	return obj, o.populateObj(jsonRaw, &obj)
 }
 
@@ -149,8 +147,8 @@ func (o *IOJSON) populateObj(jsonRaw *json.RawMessage, obj interface{}) error {
 
 // JSONFail ...
 func (o *IOJSON) JSONFail(err error) string {
-	// TODO: propery way to escape characters in err.Error()?
-	return `{"Status":false,"ErrArr":["` + strings.Replace(err.Error(), `"`, ``, -1) + `"],"ErrCount":1}`
+	log.Printf("err: %v", err.Error())
+	return `{"Status":true,"ErrArr":["Encode failed. Check log"],"ErrCount":1,"ObjArr":[],"ObjMap":{}}`
 }
 
 // Encode encodes the object itself to JSON and return []byte.
