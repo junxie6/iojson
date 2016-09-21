@@ -27,6 +27,7 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 import (
 	"fmt"
 	"github.com/junhsieh/iojson"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -226,7 +227,7 @@ func main() {
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
 ```
 
-### Middleware sample:
+### using the middleware provided by iojson example:
 
 iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
 
@@ -249,10 +250,7 @@ func srvRoot(w http.ResponseWriter, r *http.Request) {
 	o := r.Context().Value(iojson.CTXKey).(*iojson.IOJSON)
 	o.AddObjToMap("Hello", "World")
 
-	// showing how to add an error message.
-	if 1 == 2 {
-		o.AddError("my error message")
-	}
+	// NOTE: do not call o.Echo(w) if you are using iojson.EchoHandler middleware. Because it will call it for you.
 }
 
 func main() {
@@ -277,10 +275,10 @@ func main() {
 
 **Run curl command:**
 
-\# curl -H "Content-Type: application/json; charset=UTF-8" -X GET -d '{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"Data":{}}' http://127.0.0.1:8080/
+\# curl -H "Content-Type: application/json; charset=UTF-8" -X GET http://127.0.0.1:8080/
 
 **Sample outout:**
 
 ```
-{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjCount":0,"Data":{"Hello":"World"}}
+{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Hello":"World"}}
 ```
