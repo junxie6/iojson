@@ -5,7 +5,7 @@
 
 iojson provides a convenient way to exchange data between your client and server through a uniform JSON format. It helps you to encode data from Go structs to a JSON string and to decode data from a JSON string to Go structs. iojson supports storing Go objects to a slice or to a map, which means you could reference your object either by a slice index or by a map key according to your preference. After populating data from JSON to Go objects, the methods of the objects remained working.
 
-iojson also provides a HTTP middleware function, which works with [Alice](https://github.com/justinas/alice) (a famous middleware chainer).
+iojson also provides a HTTP middleware function, which works with [Alice](https://github.com/justinas/alice) (a famous middleware chainer). See examples below.
 
 ## How the uniform format looks like?
 
