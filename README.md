@@ -21,7 +21,7 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 
 ## Usage
 
-### Packages and structure definitions for examples:
+### Packages and structure definitions for the following examples:
 
 ```
 import (
