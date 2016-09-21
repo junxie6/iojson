@@ -8,6 +8,10 @@ import (
 	"testing"
 )
 
+import (
+	"github.com/junhsieh/util"
+)
+
 type Car struct {
 	Name    string
 	ItemArr []Item
@@ -91,6 +95,24 @@ func GetTestCase(storeType string) []TestCase {
 	}
 
 	return v
+}
+
+func TestAddObjToArr(t *testing.T) {
+	s1 := `{"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[{"Name":"My luxury car","ItemArr":null},{"Name":"Bag","ItemArr":null}],"ObjMap":{}}`
+
+	car := &Car{Name: "My luxury car"}
+	item := &Car{Name: "Bag"}
+
+	o := NewIOJSON()
+
+	o.AddObjToArr(car)
+	o.AddObjToArr(item)
+
+	if ok, err := util.JSONDeepEqual(o.EncodeString(), s1); err != nil {
+		t.Errorf("err: %v", err)
+	} else if !ok {
+		t.Errorf("util.JSONDeepEqual(%s, %s) = %v", o.EncodeString(), s1, ok)
+	}
 }
 
 func TestGetObj(t *testing.T) {
