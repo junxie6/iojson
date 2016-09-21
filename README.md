@@ -21,7 +21,7 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 
 ## Usage
 
-### packages and structure definitions for examples:
+### Packages and structure definitions for examples:
 
 ```
 import (
@@ -227,7 +227,7 @@ func main() {
 {"Status":true,"ErrArr":[],"ErrCount":0,"ObjArr":[],"ObjMap":{"Car.ItemArr[0]":"Bag","Car.ItemArr[1]":"Pen","Car.Name":"My luxury car"}}
 ```
 
-### using the middleware provided by iojson example:
+### Using the middleware provided by iojson example:
 
 iojson.EchoHandler stores iojson instance itself in context. Then, run iojson.Echo() at the end of the iojson.EchoHandler through defer function.
 
