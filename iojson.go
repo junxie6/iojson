@@ -6,12 +6,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"io"
 	"log"
 	"net/http"
+	"runtime"
 	"strconv"
 	"sync"
 )
+
+var debugLineNumPtr = flag.Bool("debugLineNum", false, "show filename and line number")
 
 // Size constants
 const (
@@ -26,7 +30,8 @@ const (
 
 const (
 	// ErrKeyNotExist ...
-	ErrKeyNotExist  = " key does not exist"
+	ErrKeyNotExist = " key does not exist"
+	// ErrJSONRawIsNil ...
 	ErrJSONRawIsNil = "jsonRaw is nil"
 )
 
@@ -62,6 +67,11 @@ func NewIOJSON() *IOJSON {
 // AddError ...
 func (o *IOJSON) AddError(str string) {
 	o.ErrArr = append(o.ErrArr, str)
+
+	if *debugLineNumPtr == true {
+		pc, fn, line, _ := runtime.Caller(1)
+		o.ErrArr = append(o.ErrArr, runtime.FuncForPC(pc).Name()+"["+fn+":"+strconv.Itoa(line)+"]")
+	}
 }
 
 // AddObjToArr ...
@@ -120,6 +130,7 @@ func (o *IOJSON) GetObjFromMap(k string, obj interface{}) (interface{}, error) {
 	return obj, o.populateObj(jsonRaw, &obj)
 }
 
+// NewRawMessage ...
 func (o *IOJSON) NewRawMessage(b []byte) *json.RawMessage {
 	j := json.RawMessage(b)
 	return &j
@@ -211,6 +222,9 @@ func EchoHandler(h http.Handler) http.Handler {
 		//log.Printf("DEBUG: iojson.EchoHandler: Inside")
 
 		o := NewIOJSON()
+
+		// TODO: should use use basic type string as key in context.WithValue:
+		// https://medium.com/@matryer/context-keys-in-go-5312346a868d#.kjr3hh7nh
 		ctx := context.WithValue(r.Context(), CTXKey, o)
 
 		defer func() {
