@@ -1,5 +1,6 @@
 # iojson
 
+[![Build Status](https://travis-ci.org/junhsieh/iojson.svg?branch=master)](https://travis-ci.org/junhsieh/iojson)
 [![Go Report Card](https://goreportcard.com/badge/github.com/junhsieh/iojson)](https://goreportcard.com/report/github.com/junhsieh/iojson)
 [![GoDoc](https://godoc.org/github.com/junhsieh/iojson?status.svg)](https://godoc.org/github.com/junhsieh/iojson)
 
