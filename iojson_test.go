@@ -33,7 +33,7 @@ type TestCase struct {
 	json        string
 	key         string
 	keyNotExist string
-	want        string // Car value.
+	want        string // Car value
 	want2       string // Item value
 	obj         interface{}
 }
