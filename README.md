@@ -1,8 +1,8 @@
 # iojson
 
-[![Build Status](https://travis-ci.org/junhsieh/iojson.svg?branch=master)](https://travis-ci.org/junhsieh/iojson)
-[![Go Report Card](https://goreportcard.com/badge/github.com/junhsieh/iojson)](https://goreportcard.com/report/github.com/junhsieh/iojson)
-[![GoDoc](https://godoc.org/github.com/junhsieh/iojson?status.svg)](https://godoc.org/github.com/junhsieh/iojson)
+[![Build Status](https://travis-ci.org/junxie6/iojson.svg?branch=master)](https://travis-ci.org/junxie6/iojson)
+[![Go Report Card](https://goreportcard.com/badge/github.com/junxie6/iojson)](https://goreportcard.com/report/github.com/junxie6/iojson)
+[![GoDoc](https://godoc.org/github.com/junxie6/iojson?status.svg)](https://godoc.org/github.com/junxie6/iojson)
 
 iojson provides a convenient way to exchange data between your client and server through a uniform JSON format. It helps you to encode data from Go structs to a JSON string and to decode data from a JSON string to Go structs. iojson supports storing Go objects to a slice or to a map, which means you could reference your object either by a slice index or by a map key according to your preference. After populating data from JSON to Go objects, the methods of the objects remained working.
 
@@ -28,7 +28,7 @@ iojson also provides a HTTP middleware function, which works with [Alice](https:
 ```
 import (
 	"fmt"
-	"github.com/junhsieh/iojson"
+	"github.com/junxie6/iojson"
 	"log"
 	"net/http"
 	"strconv"
@@ -240,7 +240,7 @@ import (
 )
 
 import (
-	"github.com/junhsieh/iojson"
+	"github.com/junxie6/iojson"
 	"github.com/justinas/alice"
 )
 
